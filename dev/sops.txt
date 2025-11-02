@@ -1,0 +1,68 @@
+Step 1: run the script locally
+------------------------------
+
+Navigate to 
+
+X:\abdominal_imaging\Shared\cluster-template
+
+Create a venv:
+(Note this takes a long time)
+
+>> conda create --prefix ./venv python=3.11
+
+Activate it:
+
+>> conda activate ./venv
+
+Install requirements:
+
+>> pip install -r requirements.txt
+
+Run scripts locally
+
+>> python src/all_jobs.py
+>> python src/one_job.py --num=1
+
+Notes:
+------
+
+To check the content of the venv
+
+>> conda list
+
+
+Step 2: run the script on the HPC
+---------------------------------
+
+Open windows powershell.
+
+Log in to the HPC using
+
+>> ssh -X md1spsx@stanage.shef.ac.uk
+
+Then enter password and DUO code.
+
+Once logged in go to shared dir:
+
+>> cd /shared/abdominal_imaging/Shared/cluster-template
+
+activate the venv
+
+>> source activate venv
+
+Run the script:
+
+>> python src/local.py
+
+
+Step 3: run the script as a job on the HPC
+------------------------------------------
+
+module load Anaconda3/2019.07
+module list
+
+conda venv list
+cd
+
+qsub myscript.sh
+squeue -user=$USER
