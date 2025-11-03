@@ -1,0 +1,1 @@
+Folder where the HPC will store logs (assuming batch scripts arew configured so).
