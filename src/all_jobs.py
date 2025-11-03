@@ -5,7 +5,7 @@ Script that runs all jobs at once
 
 """
 
-from job import run
+from utils.job import run
 
 
 if __name__ == "__main__":

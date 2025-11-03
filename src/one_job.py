@@ -10,7 +10,7 @@ submit multiple jobs in succession.
 
 import argparse
 
-from job import run
+from utils.job import run
 
 
 if __name__ == "__main__":
