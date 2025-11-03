@@ -181,12 +181,10 @@ When this is done, navigate the new folder and check everything is there:
 
 ```bash
 cd -r /mnt/parscratch/users/USERNAME/tutorial-cluster
-ls
 ```
 
-You should see a list of all the subfolders. 
-
-Now you can submit the job like this:
+You should see a list of all the subfolders (`ls`). Now you can 
+submit the job like this:
 
 ```bash
 sbatch hpc/all_jobs.sh
