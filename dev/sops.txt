@@ -1,5 +1,5 @@
-Step 1: run the script locally
-------------------------------
+Step 0: create a virtual environment
+------------------------------------
 
 Navigate to 
 
@@ -18,11 +18,6 @@ Install requirements:
 
 >> pip install -r requirements.txt
 
-Run scripts locally
-
->> python src/all_jobs.py
->> python src/one_job.py --num=1
-
 Notes:
 ------
 
@@ -31,10 +26,21 @@ To check the content of the venv
 >> conda list
 
 
+Step 1: run the script locally
+------------------------------
+
+Activate venv
+
+>> conda activate ./venv
+
+Run scripts locally
+
+>> python src/all_jobs.py
+>> python src/one_job.py --num=1
+
+
 Step 2: run the script on the HPC
 ---------------------------------
-
-Open windows powershell.
 
 Log in to the HPC using
 
@@ -44,25 +50,46 @@ Then enter password and DUO code.
 
 Once logged in go to shared dir:
 
->> cd /shared/abdominal_imaging/Shared/cluster-template
+>> cd /shared/abdominal_imaging/Shared/tutorial-cluster
+
+Load conda
+
+>> module load Anaconda3/2019.07
 
 activate the venv
 
 >> source activate venv
 
-Run the script:
+Run the scripts:
 
->> python src/local.py
+>> python src/all_jobs.py
+>> python src/one_job.py --num=5
 
+Note: to see installed modules
+
+>> module list
+
+To back to home dir
+
+>> cd
 
 Step 3: run the script as a job on the HPC
 ------------------------------------------
 
-module load Anaconda3/2019.07
-module list
+Issue: path needs to be mounted from a compute node
 
-conda venv list
-cd
+>> sbatch hpc/all_jobs.sh
 
-qsub myscript.sh
-squeue -user=$USER
+Check jobs in the queue
+
+>> squeue -u $USER
+
+Check status of a completed job 8466582
+
+>> sacct -j 8466582
+
+# syntax-check the script (won't execute)
+bash -n hpc/myscript.sh
+
+# run it locally with tracing to see what would happen (safe test)
+bash -x hpc/myscript.sh

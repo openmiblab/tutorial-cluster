@@ -16,8 +16,7 @@ def run(num=0):
         content = f.read()
 
     # --- Append the new string ---
-    content += ' vriend'
-    content += f" ({np.exp(num)})"
+    content += f"({np.sum(num)})"
 
     # --- Make sure the output directory exists ---
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
