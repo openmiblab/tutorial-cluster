@@ -201,7 +201,13 @@ Submitted batch job 8469461
 
 If everything has gone OK you should now see the build folder appearing 
 with all the expected output. This should be very quick for the tutorial 
-job. If it doesn't, here are some tricks to help with trouble shooting.
+job. After that you can copy results back to the shared drive:
+
+```bash
+cp -r /mnt/parscratch/users/USERNAME/tutorial-cluster/build/ /shared/abdominal_imaging/Shared/tutorial-cluster/build 
+```
+
+### Trouble shooting batch jobs
 
 You can check the status of running jobs like this
 
@@ -232,7 +238,7 @@ bash -x hpc/all_jobs.sh
 ```
 
 This generates a detailed log in the terminal. If you have built your 
-script.sh in windows apps like notepad, a common issue is that windows has included line 
+script.sh in a windows apps like notepad, a common issue is that windows has included line 
 breaks that are invalid in unix. You can clean your script like this:
 
 ```bash
