@@ -44,7 +44,7 @@ assumed it is cloned at *X:\abdominal_imaging\Shared\tutorial-cluster*.
 The first step in that process is to create the virtual environment 
 which contains the software needed to run the script. 
 
-Open a terminal (e.g in VScode, or Windows Powershell) and do the 
+On your laptop or personal computer, open a terminal (e.g in VScode, or Windows Powershell) and do the 
 following:
 
 Navigate to the folder:
@@ -76,7 +76,7 @@ pip install -r requirements.txt
 ### Step 2: run the script locally
 
 Once you have a virtual environment you can check if the code runs 
-locally:
+locally on your laptop of personal computer.
 
 If you are starting a new session and the venv is not activated, then activate it first:
 
@@ -140,7 +140,7 @@ activate the venv (note different command from windows):
 source activate venv
 ```
 
-Mow you can run the scripts as before:
+Now you can run the scripts as before:
 
 ```bash
 python src/all_jobs.py
