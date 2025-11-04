@@ -9,22 +9,29 @@ This repository has a dual aim:
 
 ## 🛠️Structure 
 
-A pipeline repository in miblab has the following subfolders:
+Any pipeline will ultimately read data from a specific location, and 
+write output elsewhere. Generally the data will live on a separate 
+read-only folder somewhere in the file system, and the results will be 
+written out in another folder. To mimick this process, this tutorial 
+has three top-level folders. In reality these may exist at three 
+different locations in the file system:
 
-- **data**: source data. This is a read-only folder
+- **data**: source data. This is a read-only folder.
 - **build**: this is where all the output appears. The folder is created 
   by the scripts if it does not yet exist.
-- **hpc**: folder with top-level unix scripts used to send jobs to the cluster.
-- **logs**: folder where the HPC will deposit logs of the computations.
-- **src**: folder with python source code. The top level contains 
-  standalone main scripts that can be run on themselves or called from 
-  the batch scripts in /hpc. Any number of subfolders can be used to 
+- **code**: This contains the actual pipeline code including any 
+  functionality needed to run on the cluster. 
+
+The **code** folder has a file withe python requirements and the 
+following subfolders:
+
+- **venv**: a virtual environment with the required software installations.
+- **src**: python source code. The top level contains 
+  standalone main scripts. Any number of subfolders can be used to 
   store helper functions and reusable utility that is used in multiple 
   scripts.
-- **venv**: a virtual environment created when the code is executed.
-
-The top level contains a file with the python requirements, as well
-as the license (always Apache 2.0 in miblab) and this README.
+- **hpc**: folder with top-level unix scripts used to send jobs to the cluster.
+- **logs**: folder where the HPC will deposit logs of the computations.
 
 ## 💻 Usage
 
@@ -37,23 +44,33 @@ the content of data/test.txt, attaches a counter and save the results
 in /build. It does this 11 times creating new files numbered 0 to 10.
 
 In order to run the tutorial, first clone this repository. We will 
-assumed it is cloned at *X:\abdominal_imaging\Shared\tutorial-cluster*.
+assumed it is cloned at *X:\abdominal_imaging\Shared\tutorial-cluster*. 
+While this can be done on a local hard drive as well, having it on 
+shared storage means that the data are visible from the cluster's login 
+node, which means computations can be run interactively without 
+transferring the data to the cluster. When the computation is submitted 
+as a job the data will still need to be copied to the cluster first 
+as the compute nodes unfortunately can't access the shared storage.
+
+We also assume you already have python and conda installed. Other tools 
+such as VSCode are optional as the tutorial can be run from a console as well.
 
 ### Step 1: create a virtual environment
 
 The first step in that process is to create the virtual environment 
 which contains the software needed to run the script. 
 
-On your laptop or personal computer, open a terminal (e.g in VScode, or Windows Powershell) and do the 
-following:
+On your laptop or personal computer, open a terminal (e.g in VScode, 
+or Windows Powershell) and do the following:
 
-Navigate to the folder:
+Navigate to the folder with the code:
 
 ```bash
-cd X:\abdominal_imaging\Shared\tutorial-cluster
+cd X:\abdominal_imaging\Shared\tutorial-cluster\code
 ```
 
-Create a virtual environment (Note this can take a long time):
+Create a virtual environment (note this can take a long time on the 
+shared storage):
 
 ```bash
 conda create --prefix ./venv python=3.11
@@ -78,7 +95,8 @@ pip install -r requirements.txt
 Once you have a virtual environment you can check if the code runs 
 locally on your laptop of personal computer.
 
-If you are starting a new session and the venv is not activated, then activate it first:
+If you are starting a new session and the venv is not activated, 
+then activate it first:
 
 ```bash
 conda activate ./venv
@@ -87,7 +105,7 @@ conda activate ./venv
 Run the top level script locally:
 
 ```bash
-python src/all_jobs.py
+python src/all_jobs.py --data=X:\abdominal_imaging\Shared\tutorial-cluster\data --build=X:\abdominal_imaging\Shared\tutorial-cluster\build
 ```
 
 This should create the /build folder with 11 edited text files. 
@@ -97,7 +115,7 @@ rather than all of them at the same time. To try it, delete the build
 folder and run this:
 
 ```bash
-python src/one_job.py --num=5
+python src/one_job.py --num=5 --data=X:\abdominal_imaging\Shared\tutorial-cluster\data --build=X:\abdominal_imaging\Shared\tutorial-cluster\build
 ```
 
 This has now only created a single file 5. The one_job.py script is 
@@ -125,7 +143,7 @@ You will be asked to enter a password and DUO code.
 Once logged in go to the shared dir:
 
 ```bash
-cd /shared/abdominal_imaging/Shared/tutorial-cluster
+cd /shared/abdominal_imaging/Shared/tutorial-cluster/code
 ```
 
 Load conda:
@@ -143,55 +161,64 @@ source activate venv
 Now you can run the scripts as before:
 
 ```bash
-python src/all_jobs.py
+python src/all_jobs.py --data=/shared/abdominal_imaging/Shared/tutorial-cluster/data --build=/shared/abdominal_imaging/Shared/tutorial-cluster/build
 ```
 or:
 
 ```bash
-python src/one_job.py --num=5
+python src/one_job.py --num=5 --data=/shared/abdominal_imaging/Shared/tutorial-cluster/data --build=/shared/abdominal_imaging/Shared/tutorial-cluster/build
 ```
 
+Note there was no need to copy the data to the cluster, and the results 
+appear directly on the share storage. This is because the login nodes 
+that run interactive computations can access shared storage directly.
 
 ### Step 4: run the script as a job on the HPC
 
-In order to run the job on the cluster, first make sure the batch 
-files like hpc/all_jobs.sh are correctly configured. For instance 
-you want to make sure status updates are sent to your email, that 
-you request reasonable resources, etc.
+Unfortunately the compute node which runs computations submitted as 
+jobs cannot access the shared storage directly. Therefore the first 
+step is to copy the code and any data to a dedicated storage on the HPC.
 
-Unfortunately the compute node on the HPC cannot access the shared 
-drive directly (unlike the login node which is used for interactive 
-computations). Therefore the first step is to copy the repository 
-including any data to a dedicated storage on the HPC.
-
-Log in to the HPC using your USERNAME:
+Log in to the HPC using your USERNAME if you haven't already:
 
 ```bash
 ssh -X USERNAME@stanage.shef.ac.uk
 ```
 
-Copy the repository to a scratch folder in your user folder. Make sure 
+Copy the code and data to a scratch folder in your user folder. Make sure 
 to substitute USERNAME by your user name:
 
 ```bash
 cp -r /shared/abdominal_imaging/Shared/tutorial-cluster/ /mnt/parscratch/users/USERNAME/tutorial-cluster
 ```
 
-When this is done, navigate the new folder and check everything is there:
+When this is done, navigate to the new folder and check everything is there:
 
 ```bash
-cd -r /mnt/parscratch/users/USERNAME/tutorial-cluster
+cd /mnt/parscratch/users/USERNAME/tutorial-cluster
 ```
 
-You should see a list of all the subfolders (`ls`). Now you can 
-submit the job like this:
+You should see a list of all the files and subfolders (`ls`). 
+
+In order to run the job on the cluster, first make sure the batch 
+files like `all_jobs.sh` are correctly configured. For instance 
+you want to make sure status updates are sent to your email, that 
+you request reasonable resources, and especially that the last line 
+which runs the script is pointing to the correct paths. In this case 
+the last line of `all_jobs.sh` should read:
 
 ```bash
-sbatch hpc/all_jobs.sh
+srun python code/src/all_jobs.py --data=/mnt/parscratch/users/USERNAME/tutorial-cluster/data --build=/mnt/parscratch/users/USERNAME/tutorial-cluster/build
 ```
 
-You should get a message that the batch job is submitted, which will 
-include a number that identifies the job:
+Now you can submit the job like this:
+
+```bash
+sbatch code/hpc/all_jobs.sh
+```
+
+If all is well you should get a message that the 
+batch job is submitted, which will include a number that identifies the job:
 
 ```bash
 Submitted batch job 8469461
@@ -206,6 +233,16 @@ cp -r /mnt/parscratch/users/USERNAME/tutorial-cluster/build/ /shared/abdominal_i
 ```
 
 ### Trouble shooting batch jobs
+
+If you have edited your `all_jobs.sh` with a windows editor you will 
+likely get an error with UNIX line breaks. To fix this, first clean 
+your file:
+
+```bash
+dos2unix code/hpc/all_jobs.sh
+```
+
+Then try again. 
 
 You can check the status of running jobs like this
 
@@ -226,13 +263,13 @@ batch script had errors, data were not found, etc.
 You can syntax-check the script before actually running it:
 
 ```bash
-bash -n hpc/all_jobs.sh
+bash -n code/hpc/all_jobs.sh
 ```
 
 And you can run the script locally with tracing to see what would happen (safe test)
 
 ```bash
-bash -x hpc/all_jobs.sh
+bash -x code/hpc/all_jobs.sh
 ```
 
 This generates a detailed log in the terminal. If you have built your 

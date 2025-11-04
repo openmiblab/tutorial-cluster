@@ -50,5 +50,5 @@ source activate venv
 
 # srun runs your program on the allocated compute resources managed by Slurm
 # where $SLURM_ARRAY_TASK_ID = the current job’s array index (from 0 to 10).
-srun python src/one_job.py --num $SLURM_ARRAY_TASK_ID
+srun python code/src/one_job.py --num $SLURM_ARRAY_TASK_ID --data=/mnt/parscratch/users/md1spsx/tutorial-cluster/data --build=/mnt/parscratch/users/md1spsx/tutorial-cluster/build
 

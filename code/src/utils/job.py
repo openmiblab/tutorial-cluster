@@ -3,11 +3,11 @@ import os
 import numpy as np
 
 
-INPUT_PATH = os.path.join(os.getcwd(), 'data')
-OUTPUT_PATH = os.path.join(os.getcwd(), 'build')
 
+def run(data=None, build=None, num=0):
 
-def run(data=INPUT_PATH, build=OUTPUT_PATH, num=0):
+    if (data is None) or (build is None):
+        raise ValueError('Please provide data and build directories.')
 
     print(f"Running test with num = {num}")
 
