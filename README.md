@@ -266,18 +266,22 @@ You can syntax-check the script before actually running it:
 bash -n code/hpc/all_jobs.sh
 ```
 
-And you can run the script locally with tracing to see what would happen (safe test)
+And you can run the script locally with tracing to see what would happen:
 
 ```bash
 bash -x code/hpc/all_jobs.sh
 ```
 
-This generates a detailed log in the terminal. If you have built your 
-script.sh in a windows apps like notepad, a common issue is that windows has included line 
-breaks that are invalid in unix. You can clean your script like this:
+This generates a detailed log in the terminal. 
 
-```bash
-dos2unix all_jobs.sh
+### Notes
+
+If you are working from a local PC your data cannot be copied to the 
+HPC as shown above, because the HPC cannot access your PC. Instead 
+they can be copied to the HPC like this:
+
+```batch
+scp -r C:/Users/USERNAME/Documents/folder USERNAME@stanage.shef.ac.uk:/mnt/parscratch/users/USERNAME/folder
 ```
 
 
