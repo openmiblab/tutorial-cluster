@@ -43,10 +43,13 @@ export SLURM_EXPORT_ENV=ALL
 # (On HPC systems, software is usually installed as “modules” to avoid version conflicts.)
 module load Anaconda3/2024.02-1
 
+# Initialize Conda for this non-interactive shell
+eval "$(conda shell.bash hook)"
+
 # Activates your Conda environment named venv.
 # (Older clusters use source activate; newer Conda versions use conda activate venv.)
 # We assume that the conda environment 'venv' has already been created
-source activate tutorial-cluster
+conda activate tutorial-cluster
 
 # srun runs your program on the allocated compute resources managed by Slurm
 # where $SLURM_ARRAY_TASK_ID = the current job’s array index (from 0 to 10).
