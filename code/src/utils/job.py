@@ -1,6 +1,7 @@
 import os
 
 import numpy as np
+import pydmr
 
 
 
@@ -14,6 +15,7 @@ def run(data=None, build=None, num=0):
     # --- Settings ---
     input_file = os.path.join(data, 'test.txt')
     output_file = os.path.join(build, f'test_{num}.txt')
+    dmr_file = os.path.join(build, f'test_{num}.dmr')
 
     # --- Read the original file ---
     with open(input_file, "r", encoding="utf-8") as f:
@@ -28,5 +30,16 @@ def run(data=None, build=None, num=0):
     # --- Save the new file ---
     with open(output_file, "w", encoding="utf-8") as f:
         f.write(content)
+
+    # --- Save a dmr file with the same name ---
+    dmr = {
+        'data':{
+            'num':['Iteration number', '', 'int'],
+        },
+        'pars':{
+            ('subject', 'study', 'num'): num,
+        },
+    } 
+    pydmr.write(dmr_file, dmr)
 
     print(f"✅ File saved to: {output_file}")

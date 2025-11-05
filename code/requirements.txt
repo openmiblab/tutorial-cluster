@@ -1,1 +1,1 @@
-numpy
+pydmr==0.0.3

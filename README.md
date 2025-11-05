@@ -9,240 +9,160 @@ This repository has a dual aim:
 
 ## 🛠️Structure 
 
-Any pipeline will ultimately read data from a specific location, and 
-write output elsewhere. Generally the data will live on a separate 
-read-only folder somewhere in the file system, and the results will be 
-written out in another folder. To mimick this process, this tutorial 
-has three top-level folders. In reality these may exist at three 
-different locations in the file system:
+Any pipeline will ultimately read data from a specific location, and write output elsewhere. Generally the data will live on a separate read-only folder somewhere in the file system, and the results will be written out in another folder. 
 
+To mimick this process, this tutorial has three top-level folders. In reality these may exist at three different locations in the file system:
+
+- **code**: This contains the actual pipeline code including any functionality needed to run on the cluster. 
 - **data**: source data. This is a read-only folder.
-- **build**: this is where all the output appears. The folder is created 
-  by the scripts if it does not yet exist.
-- **code**: This contains the actual pipeline code including any 
-  functionality needed to run on the cluster. 
+- **build**: this is where all the output appears. The folder is created by the scripts if it does not yet exist.
 
-The **code** folder has a file withe python requirements and the 
-following subfolders:
+The **code** folder has the following files:
 
-- **venv**: a virtual environment with the required software installations.
-- **src**: python source code. The top level contains 
-  standalone main scripts. Any number of subfolders can be used to 
-  store helper functions and reusable utility that is used in multiple 
-  scripts.
+- **environment.yml**: This lists the necessary software that is available through conda.
+- **requirements.txt**: This lists python packages not available on conda, and any editable installations.
+
+And the following directories:
+
+- **src**: python source code. The top level contains standalone main scripts. Any number of subfolders can be used to store helper functions and reusable utility that is used in multiple scripts.
 - **hpc**: folder with top-level unix scripts used to send jobs to the cluster.
 - **logs**: folder where the HPC will deposit logs of the computations.
 
 ## 💻 Usage
 
-Typically pipelines are developed and tested locally with data either 
-on a local hard drive or the shared data storage, and subsequently 
-submitted as a batch job on the HPC. 
+Typically pipelines are developed and tested locally with data either on a local hard drive or the shared data storage, and subsequently submitted as a batch job on the HPC. 
 
-The following tutorial shows the steps using a simple script which reads 
-the content of data/test.txt, attaches a counter and save the results 
-in /build. It does this 11 times creating new files numbered 0 to 10.
+The following tutorial shows the steps using a simple script which reads the content of data/test.txt, attaches a counter and save the results in /build. It does this 11 times creating new files numbered 0 to 10. It also exports dmr files so you can test the usage of packages that are not on conda. 
 
-In order to run the tutorial, first clone this repository. We will 
-assumed it is cloned at *X:\abdominal_imaging\Shared\tutorial-cluster*. 
-While this can be done on a local hard drive as well, having it on 
-shared storage means that the data are visible from the cluster's login 
-node, which means computations can be run interactively without 
-transferring the data to the cluster. When the computation is submitted 
-as a job the data will still need to be copied to the cluster first 
-as the compute nodes unfortunately can't access the shared storage.
+In order to run the tutorial, first clone this repository. We will assumed it is cloned at:
 
-We also assume you already have python and conda installed. Other tools 
-such as VSCode are optional as the tutorial can be run from a console as well.
+*C:\Users\USERNAME\Documents\GitHub\tutorial-cluster*
 
-### Step 1: create a virtual environment
+Throughout this tutorial, replace USERNAME by your sheffield username.
 
-The first step in that process is to create the virtual environment 
-which contains the software needed to run the script. 
+We also assume you already have python and conda installed. Other tools such as VSCode are optional as the tutorial can be run from a console.
 
-On your laptop or personal computer, open a terminal (e.g in VScode, 
-or Windows Powershell) and do the following:
+
+## Run the script locally
+
+Testing, debugging and editing on the cluster is possible but difficult as no user friendly development environments like VSCode are available. 
+
+So it's best to first test a script locally before running it on the cluster. We will do this using a conda environment so the process is exactly the same as on the cluster, and all steps can be tested including installation.
+
+The first step is to create the virtual environment which contains the software needed to run the script. On your laptop or personal computer, open a terminal (e.g in VScode, or Windows Powershell) and do the following:
 
 Navigate to the folder with the code:
 
 ```bash
-cd X:\abdominal_imaging\Shared\tutorial-cluster\code
+cd C:\Users\USERNAME\Documents\GitHub\tutorial-cluster\code
 ```
 
-Create a virtual environment (note this can take a long time on the 
-shared storage):
+Create a virtual environment:
 
 ```bash
-conda create --prefix ./venv python=3.11
+conda env create -n tutorial-cluster -f environment.yml
 ```
 
-When this is done you should see the venv folder appearing. 
+Once you have a virtual environment you can check if the code runs locally on your laptop or personal computer.
 
-Activate it:
-
-```bash
-conda activate ./venv
-```
-
-and install the requirements:
+First activate the venv.
 
 ```bash
-pip install -r requirements.txt
-```
-
-### Step 2: run the script locally
-
-Once you have a virtual environment you can check if the code runs 
-locally on your laptop of personal computer.
-
-If you are starting a new session and the venv is not activated, 
-then activate it first:
-
-```bash
-conda activate ./venv
+conda activate tutorial-cluster
 ```
 
 Run the top level script locally:
 
 ```bash
-python src/all_jobs.py --data=X:\abdominal_imaging\Shared\tutorial-cluster\data --build=X:\abdominal_imaging\Shared\tutorial-cluster\build
+python src/all_jobs.py --data=C:\Users\USERNAME\Documents\GitHub\tutorial-cluster\data --build=C:\Users\USERNAME\Documents\GitHub\tutorial-cluster\build
 ```
 
-This should create the /build folder with 11 edited text files. 
-The repository also contains a second script which can be 
-call with a --num argument. Running this will produce a single file 
-rather than all of them at the same time. To try it, delete the build 
-folder and run this:
+This should create the /build folder with 11 edited text files, and 11 dmr files.
+
+The repository also contains a second script which can be called with a --num argument. Running this will produce a single file rather than all of them at the same time. To try it, delete the build folder and run this:
 
 ```bash
-python src/one_job.py --num=5 --data=X:\abdominal_imaging\Shared\tutorial-cluster\data --build=X:\abdominal_imaging\Shared\tutorial-cluster\build
+python src/one_job.py --num=5 --data=C:\Users\USERNAME\Documents\GitHub\tutorial-cluster\data --build=C:\Users\USERNAME\Documents\GitHub\tutorial-cluster\build
 ```
 
-This has now only created a single file 5. The one_job.py script is 
-included as script of this type is needed to send multiple jobs to 
-the scanner at the same time. These will then be executed sequentially, 
-and results will appear one by one. This is typically used for instance 
-to run identical analyses on single subjects, where each subject is a 
-separate job.
+This has now only created results for iteration 5. 
 
-### Step 3: run the script interactively on the HPC
+The one_job.py script is included as script of this type is needed to send multiple jobs to the scanner at the same time. This is typically used to run identical analyses on multiple subjects, where each subject is a separate job.
 
-Once everything is fine locally, you can try running the script 
-interactively on the cluster. This is not a good way of running large 
-numbers of jobs but helps to test and debug any issues running scripts 
-on the cluster.
 
-Log in to the HPC using your USERNAME:
+## Run the script as a job on the HPC
 
-```bash
-ssh -X USERNAME@stanage.shef.ac.uk
-```
+Once it is all running as intended locally, we can run the script on the HPC. 
 
-You will be asked to enter a password and DUO code.
+To start, delete the build folders and unnecessary folders such as .git. This means less data need to be copied over. 
 
-Once logged in go to the shared dir:
-
-```bash
-cd /shared/abdominal_imaging/Shared/tutorial-cluster/code
-```
-
-Load conda:
-
-```bash
-module load Anaconda3/2019.07
-```
-
-activate the venv (note different command from windows):
-
-```bash
-source activate venv
-```
-
-Now you can run the scripts as before:
-
-```bash
-python src/all_jobs.py --data=/shared/abdominal_imaging/Shared/tutorial-cluster/data --build=/shared/abdominal_imaging/Shared/tutorial-cluster/build
-```
-or:
-
-```bash
-python src/one_job.py --num=5 --data=/shared/abdominal_imaging/Shared/tutorial-cluster/data --build=/shared/abdominal_imaging/Shared/tutorial-cluster/build
-```
-
-Note there was no need to copy the data to the cluster, and the results 
-appear directly on the share storage. This is because the login nodes 
-that run interactive computations can access shared storage directly.
-
-### Step 4: run the script as a job on the HPC
-
-Unfortunately the compute node which runs computations submitted as 
-jobs cannot access the shared storage directly. Therefore the first 
-step is to copy the code and any data to a dedicated storage on the HPC.
-
-Log in to the HPC using your USERNAME if you haven't already:
-
-```bash
-ssh -X USERNAME@stanage.shef.ac.uk
-```
-
-Copy the code and data to a scratch folder in your user folder. Make sure 
-to substitute USERNAME by your user name:
-
-```bash
-cp -r /shared/abdominal_imaging/Shared/tutorial-cluster/ /mnt/parscratch/users/USERNAME/tutorial-cluster
-```
-
-When this is done, navigate to the new folder and check everything is there:
-
-```bash
-cd /mnt/parscratch/users/USERNAME/tutorial-cluster
-```
-
-You should see a list of all the files and subfolders (`ls`). 
-
-In order to run the job on the cluster, first make sure the batch 
-files like `all_jobs.sh` are correctly configured. For instance 
-you want to make sure status updates are sent to your email, that 
-you request reasonable resources, and especially that the last line 
-which runs the script is pointing to the correct paths. In this case 
-the last line of `all_jobs.sh` should read:
+Second, edit the last line of the hpc scripts `all_jobs.sh` and `series_of_jobs.sh` to make sure they are pointing to the correct paths, e.g.:
 
 ```bash
 srun python code/src/all_jobs.py --data=/mnt/parscratch/users/USERNAME/tutorial-cluster/data --build=/mnt/parscratch/users/USERNAME/tutorial-cluster/build
 ```
 
+Now we can copy the code and any data to the HPC. Since they are all in the same folder it can be done in a single step:
+
+```bash
+scp -r C:\Users\USERNAME\Documents\GitHub\tutorial-cluster md1spsx@stanage.shef.ac.uk:/mnt/parscratch/users/USERNAME/tutorial-cluster
+```
+
+You will be asked to provide your password and DUO key.
+
+Now that everything is copied over you can log in to run the script
+
+```bash
+ssh -X USERNAME@stanage.shef.ac.uk
+```
+
+Navigate to the folder and check everything is there:
+
+```bash
+cd /mnt/parscratch/users/USERNAME/tutorial-cluster/code
+```
+
+You should see a list of all the files and subfolders (`ls`). 
+
+Load the latest Anaconda module:
+
+```bash
+module load Anaconda3/2024.02-1
+```
+
+Create an environment in the same way as before:
+
+```bash
+conda env create -n tutorial-cluster -f environment.yml
+```
+
 Now you can submit the job like this:
 
 ```bash
-sbatch code/hpc/all_jobs.sh
+sbatch hpc/all_jobs.sh
 ```
 
-If all is well you should get a message that the 
-batch job is submitted, which will include a number that identifies the job:
+You should get a message that the batch job is submitted, which will include a number that identifies the job:
 
 ```bash
 Submitted batch job 8469461
 ```
 
-If everything has gone OK you should now see the build folder appearing 
-with all the expected output. This should be very quick for the tutorial 
-job. After that you can copy results back to the shared drive:
+If everything has gone OK you should now see the build folder appearing with all the expected output. This should be almost instant. 
+
+After that you can pull results back to your local drive. Exit the cluster and do:
 
 ```bash
-cp -r /mnt/parscratch/users/USERNAME/tutorial-cluster/build/ /shared/abdominal_imaging/Shared/tutorial-cluster/build 
+scp -r USERNAME@stanage.shef.ac.uk:/mnt/parscratch/users/USERNAME/tutorial-cluster/build C:\Users\USERNAME\Documents\GitHub\tutorial-cluster\build
 ```
 
-### Trouble shooting batch jobs
+## Trouble shooting batch jobs on the HPC
 
-If you have edited your `all_jobs.sh` with a windows editor you will 
-likely get an error with UNIX line breaks. To fix this, first clean 
-your file:
+If you have edited your `all_jobs.sh` with a windows editor you will likely get an error with UNIX line breaks. To fix this, clean your file before running it:
 
 ```bash
-dos2unix code/hpc/all_jobs.sh
+dos2unix hpc/all_jobs.sh
 ```
-
-Then try again. 
 
 You can check the status of running jobs like this
 
@@ -256,33 +176,19 @@ To check status of a specific completed job:
 sacct -j 8469461
 ```
 
-If the job has run you should find a log in /logs folder. If there 
-is no log it means the job did not even run, maybe because the 
-batch script had errors, data were not found, etc.
-
-You can syntax-check the script before actually running it:
+If the script has failed, you can syntax-check it before running it:
 
 ```bash
-bash -n code/hpc/all_jobs.sh
+bash -n hpc/all_jobs.sh
 ```
 
-And you can run the script locally with tracing to see what would happen:
+And you can also run it in debug mode on the login node:
 
 ```bash
-bash -x code/hpc/all_jobs.sh
+bash -x hpc/all_jobs.sh
 ```
 
 This generates a detailed log in the terminal. 
-
-### Notes
-
-If you are working from a local PC your data cannot be copied to the 
-HPC as shown above, because the HPC cannot access your PC. Instead 
-they can be copied to the HPC like this:
-
-```batch
-scp -r C:/Users/USERNAME/Documents/folder USERNAME@stanage.shef.ac.uk:/mnt/parscratch/users/USERNAME/folder
-```
 
 
 ## 👥 Contributors

@@ -1,0 +1,14 @@
+name: tutorial_env
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  # Core packages installed via Conda
+  - python=3.11
+  - pandas
+  - numpy
+  - pip
+  
+  # Pip-only packages
+  - pip:
+      - -r requirements.txt

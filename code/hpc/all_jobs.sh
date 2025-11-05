@@ -36,14 +36,14 @@ export SLURM_EXPORT_ENV=ALL
 
 # Loads the Anaconda module provided by the cluster.
 # (On HPC systems, software is usually installed as “modules” to avoid version conflicts.)
-module load Anaconda3/2019.07
+module load Anaconda3/2024.02-1
 
 # Activates your Conda environment named venv.
 # (Older clusters use source activate; newer Conda versions use conda activate venv.)
 # We assume that the conda environment 'venv' has already been created
-source activate venv
+source activate tutorial-cluster
 
 # srun runs your program on the allocated compute resources managed by Slurm
 # where $SLURM_ARRAY_TASK_ID = the current job’s array index (from 0 to 10).
-srun python code/src/all_jobs.py --data=/mnt/parscratch/users/md1spsx/tutorial-cluster/data --build=/mnt/parscratch/users/md1spsx/tutorial-cluster/build
+srun python src/all_jobs.py --data=/mnt/parscratch/users/USERNAME/tutorial-cluster/data --build=/mnt/parscratch/users/USERNAME/tutorial-cluster/build
 
