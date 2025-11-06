@@ -192,6 +192,8 @@ This generates a detailed log in the terminal. This is handy if the script has n
 
 ## 👥 Contributors
 
+If you have suggestions for improving this tutorial, please submit an issue.
+
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
