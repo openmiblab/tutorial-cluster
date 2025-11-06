@@ -104,7 +104,7 @@ srun python code/src/all_jobs.py --data=/mnt/parscratch/users/USERNAME/tutorial-
 Now we can copy the code and any data to these paths on the HPC. Since they are all in the same folder it can be done in a single step:
 
 ```bash
-scp -r C:\Users\USERNAME\Documents\GitHub\tutorial-cluster USERNAME@stanage.shef.ac.uk:/mnt/parscratch/users/USERNAME/tutorial-cluster
+scp -r C:\Users\USERNAME\Documents\GitHub\tutorial-cluster USERNAME@stanage.shef.ac.uk:/mnt/parscratch/users/USERNAME
 ```
 
 Now that everything is copied over you can log in to the HPC to set things up and run the script:
