@@ -139,7 +139,7 @@ Now you can submit the job like this:
 sbatch hpc/all_jobs.sh
 ```
 
-You should get a message that the batch job is submitted, which will include a number that identifies the job:
+You should get a message that the batch job is submitted, which will include a number (job ID) that identifies the job:
 
 ```bash
 Submitted batch job 8469461
@@ -169,7 +169,7 @@ You can check the status of running jobs like this
 squeue -u $USER
 ```
 
-To check status of a specific completed job:
+To check status of a specific completed job, use the job ID (8469461 in this case):
 
 ```bash
 sacct -j 8469461
