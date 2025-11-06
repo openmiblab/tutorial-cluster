@@ -1,4 +1,4 @@
-# Tutorial and template for running jobs on the HPC in Sheffield
+# Running jobs on the HPC in Sheffield: a tutorial
 
 ## 📚 Aim
 
@@ -6,6 +6,9 @@ This repository has a dual aim:
 
 - It forms a template for miblab repositories with processing pipelines.
 - It forms a tutorial with a dummy job showing how to run jobs on the cluster.
+
+See also the University's [documentation](https://docs.hpc.shef.ac.uk/) on the HPC (High Performance Computer), or *cluster*, for short.
+
 
 ## 🛠️Structure 
 
@@ -22,7 +25,7 @@ The **code** folder has the following files:
 - **environment.yml**: This lists the necessary software that is available through conda.
 - **requirements.txt**: This lists python packages not available on conda, and any editable installations.
 
-And the following directories:
+The **code** folder has the following directories:
 
 - **src**: python source code. The top level contains standalone main scripts. Any number of subfolders can be used to store helper functions and reusable utility that is used in multiple scripts.
 - **hpc**: folder with top-level unix scripts used to send jobs to the cluster.
@@ -38,7 +41,7 @@ In order to run the tutorial, first clone this repository. We will assumed it is
 
 *C:\Users\USERNAME\Documents\GitHub\tutorial-cluster*
 
-Throughout this tutorial, replace USERNAME by your sheffield username.
+<mark>Throughout this tutorial, replace *USERNAME* by your sheffield username.</mark>
 
 We also assume you already have python and conda installed. Other tools such as VSCode are optional as the tutorial can be run from a console.
 
@@ -87,7 +90,7 @@ python src/one_job.py --num=5 --data=C:\Users\USERNAME\Documents\GitHub\tutorial
 
 This has now only created results for iteration 5. 
 
-The one_job.py script is included as script of this type is needed to send multiple jobs to the scanner at the same time. This is typically used to run identical analyses on multiple subjects, where each subject is a separate job.
+The one_job.py script is included as script of this type is needed to send multiple jobs to the HPC at the same time. This is typically used to run identical analyses on multiple subjects, where each subject is a separate job.
 
 
 ## Run the script as a job on the HPC
@@ -96,21 +99,19 @@ Once it is all running as intended locally, we can run the script on the HPC.
 
 To start, delete the build folders and unnecessary folders such as .git. This means less data need to be copied over. 
 
-Second, edit the last line of the hpc scripts `all_jobs.sh` and `series_of_jobs.sh` to make sure they are pointing to the correct paths, e.g.:
+Second, edit the last line of the hpc scripts `all_jobs.sh` and `series_of_jobs.sh` to make sure they are pointing to the paths on the HPC where you will be storing the data. In this case you will just have to replace USERNAME with your user name:
 
 ```bash
 srun python code/src/all_jobs.py --data=/mnt/parscratch/users/USERNAME/tutorial-cluster/data --build=/mnt/parscratch/users/USERNAME/tutorial-cluster/build
 ```
 
-Now we can copy the code and any data to the HPC. Since they are all in the same folder it can be done in a single step:
+Now we can copy the code and any data to these paths on the HPC. Since they are all in the same folder it can be done in a single step:
 
 ```bash
-scp -r C:\Users\USERNAME\Documents\GitHub\tutorial-cluster md1spsx@stanage.shef.ac.uk:/mnt/parscratch/users/USERNAME/tutorial-cluster
+scp -r C:\Users\USERNAME\Documents\GitHub\tutorial-cluster USERNAME@stanage.shef.ac.uk:/mnt/parscratch/users/USERNAME/tutorial-cluster
 ```
 
-You will be asked to provide your password and DUO key.
-
-Now that everything is copied over you can log in to run the script
+Now that everything is copied over you can log in to the HPC to set things up and run the script:
 
 ```bash
 ssh -X USERNAME@stanage.shef.ac.uk
