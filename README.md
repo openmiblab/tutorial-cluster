@@ -184,7 +184,7 @@ scp -r USERNAME@stanage.shef.ac.uk:$REMOTE_DIR/build $LOCAL_DIR\build
 
 After this the results should be in your local build folder.
 
-## Cleaning up
+## Appendix 1: Cleaning up
 
 The data from your tutorial, as well as the environment, are still on the cluster. You can leave them there, but if you don't need them any more you may want to clean up.
 
@@ -206,7 +206,7 @@ And remove the environment:
 conda env remove --name tutorial-cluster
 ```
 
-## Troubleshooting batch jobs
+## Appendix 2: Troubleshooting batch jobs
 
 You can check the status of running jobs like this
 
@@ -234,7 +234,42 @@ bash -x $REMOTE_DIR/code/hpc/all_jobs.sh
 
 This generates a detailed log in the terminal. This is handy if the script has not even run, which may happen for instance if your paths to data or code are incorrect. If the script has failed after running, you can get detailed error messages by inspecting the files in the `code/logs` folder.
 
+## Appendix 3: Copying large amounts of data
 
+We have previously copied the data using `scp`, but this has limited functionality. For instance, if a large amount of data is transferred, and the transfer is interrupted at some point in the middle (e.g. because you are using wifi), then you do not want to start over. In this case you want to copy only the data that have not yet been transferred over. 
+
+This type of functionality is available through `sync` but this is a Linux program, so you need to install a Linux emulator `WSL` first (Windows Subsystem for Linux):
+
+```bash
+wsl --install
+```
+
+After installing WSL you can install `rsync` in a Linux console:
+
+```bash
+sudo apt update
+sudo apt install rsync
+```
+
+Then you can use it to copy files. Effectively it will synch two directories so it will only copy files that are not yet there:
+
+```bash
+rsync -av --progress "$LOCAL_DIR/" "$REMOTE_DIR/"
+```
+
+If it was interrupted for some reason you can just run it again and it will continue.
+
+`rsync` has other features to improve stability and avoid interruptions. This command will resume partially transferred data (rather than delete and start over), copy in place for speed and try 5 minutes before giving up:
+
+```bash
+rsync -av --progress --partial --inplace --timeout=300 -e "ssh -o TCPKeepAlive=yes -o ServerAliveInterval=60" "$LOCAL_DIR/" "$REMOTE_DIR/"
+```
+
+You can also do a dry run to check if the transfer is complete without actually copying anything:
+
+```bash
+rsync -av --dry-run --itemize-changes "$LOCAL_DIR/" "$REMOTE_DIR/"
+```
 
 
 ## 👥 Contributors
