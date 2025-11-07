@@ -51,7 +51,15 @@ eval "$(conda shell.bash hook)"
 # We assume that the conda environment 'venv' has already been created
 conda activate tutorial-cluster
 
+# Get the current username
+USERNAME=$(whoami)
+
+# Define path variables here
+BASE_DIR="/mnt/parscratch/users/$USERNAME/tutorial-cluster"
+DATA_DIR="$BASE_DIR/data"
+BUILD_DIR="$BASE_DIR/build"
+
 # srun runs your program on the allocated compute resources managed by Slurm
 # where $SLURM_ARRAY_TASK_ID = the current job’s array index (from 0 to 10).
-srun python src/one_job.py --num $SLURM_ARRAY_TASK_ID --data=/mnt/parscratch/users/USERNAME/tutorial-cluster/data --build=/mnt/parscratch/users/USERNAME/tutorial-cluster/build
+srun python "$BASE_DIR/code/src/one_job.py" --num $SLURM_ARRAY_TASK_ID --data="$DATA_DIR" --build="$BUILD_DIR"
 

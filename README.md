@@ -43,83 +43,89 @@ In order to run the tutorial, first clone this repository. We will assumed it is
 
 *C:\Users\USERNAME\Documents\GitHub\tutorial-cluster*
 
-<mark>Throughout this tutorial, replace *USERNAME* by your sheffield username.</mark> If you clone the repository on a different location, make sure to changes the paths accordingly.
+<mark>Throughout this tutorial, replace *USERNAME* by your sheffield USERNAME.</mark> If you clone the repository on a different location, make sure to changes the paths accordingly.
 
 We also assume you already have python and conda installed. Other tools such as VSCode are optional as the tutorial can be run from a console.
 
 
 ## Run the script locally
 
-The first step is to create the virtual environment which contains the software needed to run the script. On your laptop or personal computer, open a terminal (e.g in VScode, or Windows Powershell) and do the following:
-
-Navigate to the folder with the code:
+To make things easier to read we'll first define a path variable that we can reuse throughout - <mark>please make sure to adapt the paths before running this</mark>:
 
 ```bash
-cd C:\Users\USERNAME\Documents\GitHub\tutorial-cluster\code
+$LOCAL_DIR = "C:\Users\USERNAME\Documents\GitHub\tutorial-cluster"
 ```
 
-Create a virtual environment named *tutorial-cluster*:
+The first step is to create the virtual environment which contains the software needed to run the script. On your laptop or personal computer, open a terminal (e.g in VScode, or Windows Powershell) and do the following steps.
+
+Create a virtual environment named *tutorial-cluster*, installing the software listed in the *environment.yml* file:
 
 ```bash
-conda env create -n tutorial-cluster -f environment.yml
+conda env create -n tutorial-cluster -f $LOCAL_DIR/code/environment.yml
 ```
 
-Once you have a virtual environment you can check if the code runs locally on your laptop or personal computer. To do this, first activate the environment:
+Activate the environment:
 
 ```bash
 conda activate tutorial-cluster
 ```
 
-Then run the top level script locally. The script is designed so that data and build paths can be explicitly provided - <mark>please make sure to adapt the paths before running this</mark>:
+Run the top level script locally; tell it where the data are and where you want the results to go:
 
 ```bash
-python src/all_jobs.py --data=C:\Users\USERNAME\Documents\GitHub\tutorial-cluster\data --build=C:\Users\USERNAME\Documents\GitHub\tutorial-cluster\build
+python $LOCAL_DIR/code/src/all_jobs.py --data=$LOCAL_DIR/data --build=$LOCAL_DIR/build
 ```
 
 This should create the /build folder with 11 edited text files, and 11 dmr files.
 
-The repository also contains a second script which can be called with a `--num` argument. Running this will produce a single file rather than all of them at the same time. To try it, delete the build folder and run this:
+The repository also contains a second script which can be called with a `--num` argument. Running this will produce a single file rather than all of them at the same time. To try it, remove the build folder 
 
 ```bash
-python src/one_job.py --num=5 --data=C:\Users\USERNAME\Documents\GitHub\tutorial-cluster\data --build=C:\Users\USERNAME\Documents\GitHub\tutorial-cluster\build
+rm -r $LOCAL_DIR/build
 ```
 
-This has now only created results for iteration 5. 
+and run the `one_job` script:
 
-The `one_job.py` script is included as script of this type is needed to send multiple jobs to the HPC at the same time. This is typically used to run identical analyses on multiple subjects, where each subject is a separate job.
+```bash
+python $LOCAL_DIR/code/src/one_job.py --num=5 --data=$LOCAL_DIR/data --build=$LOCAL_DIR/build
+```
+
+This has now only created results for iteration 5. The `one_job.py` script is included as script of this type is needed to send multiple jobs to the HPC at the same time. This is typically used to run identical analyses on multiple subjects, where each subject is a separate job.
 
 
 ## Run the script as a job on the HPC
 
-Once it is all running as intended locally, we can run the script on the HPC. 
-
-To start, delete the build folders and unnecessary folders such as .git. This means less data need to be copied over. 
-
-Second, edit the last line of the hpc scripts `all_jobs.sh` and `series_of_jobs.sh` to make sure they are pointing to the paths on the HPC where you will be storing the data. If you follow this tutorial you will just have to replace USERNAME:
+Once it is all running as intended locally, we can run the script on the HPC. To start, delete the local build folder again:
 
 ```bash
-srun python code/src/all_jobs.py --data=/mnt/parscratch/users/USERNAME/tutorial-cluster/data --build=/mnt/parscratch/users/USERNAME/tutorial-cluster/build
+rm -r $LOCAL_DIR/build
 ```
 
-Now we can copy the code and any data to these paths on the HPC. Since they are all in the same folder it can be done in a single step:
+In these next steps we will copy code and data over to the cluster, run the script on the cluster, and copy results back to the local drive. 
+
+We'll start by defining a path variable pointing to the location on the cluster where this needs to go:
 
 ```bash
-scp -r C:\Users\USERNAME\Documents\GitHub\tutorial-cluster USERNAME@stanage.shef.ac.uk:/mnt/parscratch/users/USERNAME
+$REMOTE_DIR = "/mnt/parscratch/users/USERNAME"
 ```
 
-Now that everything is copied over you can log in to the HPC to set things up and run the script:
+Copy the tutorial to the cluster:
+
+```bash
+scp -r $LOCAL_DIR USERNAME@stanage.shef.ac.uk:$REMOTE_DIR
+```
+
+Log in to the HPC:
 
 ```bash
 ssh -X USERNAME@stanage.shef.ac.uk
 ```
 
-Navigate to the folder and check everything is there:
+Define a local variable again (note we are in UNIX now so slightly different syntax):
 
 ```bash
-cd /mnt/parscratch/users/USERNAME/tutorial-cluster/code
+REMOTE_DIR="/mnt/parscratch/users/USERNAME/tutorial-cluster"
 ```
-
-You should see a list of all the files and subfolders (`ls`). 
 
 Load the latest Anaconda module:
 
@@ -130,13 +136,19 @@ module load Anaconda3/2024.02-1
 Create an environment in the same way as before:
 
 ```bash
-conda env create -n tutorial-cluster -f environment.yml
+conda env create -n tutorial-cluster -f $REMOTE_DIR/code/environment.yml
 ```
 
-Now you can submit the job like this:
+We are almost ready to submit the job, but first we clean the file to be safe. This is often necessary if the file has been edited in a windows editor:
 
 ```bash
-sbatch hpc/all_jobs.sh
+dos2unix $REMOTE_DIR/code/hpc/all_jobs.sh
+```
+
+Now we can submit the job:
+
+```bash
+sbatch $REMOTE_DIR/code/hpc/all_jobs.sh
 ```
 
 You should get a message that the batch job is submitted, which will include a number (job ID) that identifies the job:
@@ -145,23 +157,56 @@ You should get a message that the batch job is submitted, which will include a n
 Submitted batch job 8469461
 ```
 
-If everything has gone OK you should now see the build folder appearing with all the expected output. This should be almost instant. 
-
-After that you can pull results back to your local drive. Exit the cluster and do:
+If everything has gone OK you should now see the build folder with all the expected output. This should be almost instant. You can check by listing the contents of the folder:
 
 ```bash
-scp -r USERNAME@stanage.shef.ac.uk:/mnt/parscratch/users/USERNAME/tutorial-cluster/build C:\Users\USERNAME\Documents\GitHub\tutorial-cluster\build
+ls $REMOTE_DIR/build
+```
+
+After that you can pull results back to your local drive. Exit the cluster:
+
+```bash
+exit
+```
+
+Define paths:
+
+```bash
+$LOCAL_DIR="C:\Users\USERNAME\Documents\GitHub\tutorial-cluster"
+$REMOTE_DIR="/mnt/parscratch/users/USERNAME/tutorial-cluster"
+```
+
+And copy the results from the cluster:
+
+```bash
+scp -r USERNAME@stanage.shef.ac.uk:$REMOTE_DIR/build $LOCAL_DIR\build
 ```
 
 After this the results should be in your local build folder.
 
-## Trouble shooting batch jobs
+## Cleaning up
 
-If you have edited your `all_jobs.sh` with a windows editor you will likely get an error with UNIX line breaks. To fix this, clean your file before running it:
+The data from your tutorial, as well as the environment, are still on the cluster. You can leave them there, but if you don't need them any more you may want to clean up.
+
+Log in to the cluster again:
 
 ```bash
-dos2unix hpc/all_jobs.sh
+ssh -X USERNAME@stanage.shef.ac.uk
 ```
+
+Delete the data:
+
+```bash
+rm -rf /mnt/parscratch/users/USERNAME/tutorial-cluster
+```
+
+And remove the environment:
+
+```bash
+conda env remove --name tutorial-cluster
+```
+
+## Troubleshooting batch jobs
 
 You can check the status of running jobs like this
 
@@ -178,16 +223,18 @@ sacct -j 8469461
 If the script has failed, you can syntax-check it before running it:
 
 ```bash
-bash -n hpc/all_jobs.sh
+bash -n $REMOTE_DIR/code/hpc/all_jobs.sh
 ```
 
 And you can also run it in debug mode on the login node:
 
 ```bash
-bash -x hpc/all_jobs.sh
+bash -x $REMOTE_DIR/code/hpc/all_jobs.sh
 ```
 
 This generates a detailed log in the terminal. This is handy if the script has not even run, which may happen for instance if your paths to data or code are incorrect. If the script has failed after running, you can get detailed error messages by inspecting the files in the `code/logs` folder.
+
+
 
 
 ## 👥 Contributors
