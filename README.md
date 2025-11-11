@@ -127,10 +127,11 @@ Define a local variable again (note we are in UNIX now so slightly different syn
 REMOTE_DIR="/mnt/parscratch/users/USERNAME/tutorial-cluster"
 ```
 
-Load the latest Anaconda module:
+Load the latest Anaconda/Python module:
 
 ```bash
 module load Anaconda3/2024.02-1
+module load Python/3.10.8-GCCcore-12.2.0
 ```
 
 Create an environment in the same way as before:
@@ -251,7 +252,12 @@ sudo apt update
 sudo apt install rsync
 ```
 
-Then you can use it to copy files. Effectively it will synch two directories so it will only copy files that are not yet there:
+Then you can use it to copy files. Effectively it will synch two directories so it will only copy files that are not yet there. Note since this is a linux program all you paths need to be in Linux notation (i.e. use forward shlash and `/mnt/c/` instead of `C:\\`):
+
+```bash
+LOCAL_DIR="/mnt/c/Users/USERNAME/Documents/GitHub/tutorial-cluster"
+REMOTE_DIR="USERNAME@stanage.shef.ac.uk:/mnt/parscratch/users/USERNAME/tutorial-cluster"
+```
 
 ```bash
 rsync -av --progress "$LOCAL_DIR/" "$REMOTE_DIR/"
