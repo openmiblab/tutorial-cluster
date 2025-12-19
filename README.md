@@ -282,14 +282,14 @@ rsync -av --dry-run --itemize-changes "$LOCAL_DIR/" "$REMOTE_DIR/"
 Any results that are definitive and can be made available to others should be archived on the share storage. This can be done from the cluster, after you have obtained permission from IT to access the shared drive from the cluster. To copy data over from a login mode, define the shared storage as a remote location:
 
 ```bash
-LOCAL_DIR="/mnt/c/Users/USERNAME/Documents/GitHub/tutorial-cluster"
+LOCAL_DIR="/mnt/parscratch/users/USERNAME/tutorial-cluster"
 REMOTE_DIR="/shared/abdominal_imaging/Shared"
 ```
 
 To copy the data you need to set no-group and no-perms, but otherwise it works the same as before:
 
 ```bash
-rsync -av --progress --no-group --no-perms "$LOCAL" "$REMOTE"
+rsync -av --progress --no-group --no-perms "$LOCAL_DIR" "$REMOTE_DIR"
 ```
 
 
