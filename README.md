@@ -292,7 +292,64 @@ To copy the data you need to set no-group and no-perms, but otherwise it works t
 rsync -av --progress --no-group --no-perms "$LOCAL_DIR" "$REMOTE_DIR"
 ```
 
+This has to be done from a login node as the compute nodes cannot access the cluster directly. However, running it interactively is not ideal for large datasets as the job is stopped as soon as the terminal is closed. 
 
+A more convenient way to archive results on the shared drive is to use a batch job. The line in the shell script could look like this:
+
+```bash
+#!/bin/bash
+#SBATCH --job-name=archive_pdff
+#SBATCH --partition=interactive
+#SBATCH --time=08:00:00
+#SBATCH --mem=4G
+#SBATCH --cpus-per-task=1
+#SBATCH --output=logs/archive_%j.out
+#SBATCH --error=logs/archive_%j.err
+
+USERNAME=$(whoami)
+
+LOCAL_DIR="/mnt/parscratch/users/$USERNAME/tutorial-cluster"
+REMOTE_DIR="/shared/abdominal_imaging/Shared"
+LOGIN_NODE="login1"
+
+rsync -av --no-group --no-perms "$LOCAL_DIR" "${LOGIN_NODE}:${REMOTE_DIR}"
+```
+
+While this can in principle be integrated in a shell script for the compute job, this is not ideal as the data transfer can take a long time, and this time would count towards your compute credit. Better to save the data export as a separate job and set it to run straight after the compute job. 
+
+If the compute job has ID `9008987`, and the archiving is done by the script `archive.sh`, this can be done by specifying a dependency:
+
+```bash
+sbatch --dependency=afterok:9008987 archive.sh
+```
+
+## Appendix 5: Conda environments on parscratch
+
+Above we have created conda environments by providing their name only:
+
+```bash
+conda env create -n tutorial-cluster -f env.yml
+```
+
+This creates the environment in a default location in the home directory. When creating multiple environments this can quickly becomes problematic as conda environments are very large, and the home directory has limited capacity. 
+
+It is better therefore to create all enviroments on a default location in the parscratch storage space. If we are using a folder `envs`, then the location for the above environment would be:
+
+```bash
+ENV="/mnt/parscratch/users/$USERNAME/envs/tutorial-cluster"
+```
+
+Then the enviroment can instead be created as follows:
+
+```bash
+conda env create --prefix "$ENV" -f env.yml
+```
+
+For activating it, the explicit location must be provided:
+
+```bash
+conda activate "$ENV"
+```
 
 ## 👥 Contributors
 
