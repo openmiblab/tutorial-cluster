@@ -298,26 +298,24 @@ A more convenient way to archive results on the shared drive is to use a batch j
 
 ```bash
 #!/bin/bash
-#SBATCH --job-name=archive_pdff
-#SBATCH --partition=interactive
+#SBATCH --job-name=arxv
 #SBATCH --time=08:00:00
 #SBATCH --mem=4G
 #SBATCH --cpus-per-task=1
-#SBATCH --output=logs/archive_%j.out
-#SBATCH --error=logs/archive_%j.err
+#SBATCH --output=logs/arxv_%j.out
+#SBATCH --error=logs/arxv_%j.err
 
 USERNAME=$(whoami)
 
 LOCAL_DIR="/mnt/parscratch/users/$USERNAME/tutorial-cluster"
-REMOTE_DIR="/shared/abdominal_imaging/Shared"
-LOGIN_NODE="login1"
+REMOTE_DIR="login1:/shared/abdominal_imaging/Shared"
 
-rsync -av --no-group --no-perms "$LOCAL_DIR" "${LOGIN_NODE}:${REMOTE_DIR}"
+rsync -av --no-group --no-perms "$LOCAL_DIR" "$REMOTE_DIR"
 ```
 
-While this can in principle be integrated in a shell script for the compute job, this is not ideal as the data transfer can take a long time, and this time would count towards your compute credit. Better to save the data export as a separate job and set it to run straight after the compute job. 
+The `rsync` line can be integrated in a batch srcipt after the compute job, but data transfer can take a long time and will count towards your compute credit. If you are running a job on a GPU this is not ideal, as compute time on GPUs is expensive and there is no benefit in using a GPU for data transfer. 
 
-If the compute job has ID `9008987`, and the archiving is done by the script `archive.sh`, this can be done by specifying a dependency:
+In that case it is better to submit the archiving job as a separate job after the GPU computation. If the compute job has ID `9008987`, and the archiving is done by the script `archive.sh`, this can be done by specifying a dependency:
 
 ```bash
 sbatch --dependency=afterok:9008987 archive.sh
@@ -349,6 +347,12 @@ For activating it, the explicit location must be provided:
 
 ```bash
 conda activate "$ENV"
+```
+
+To remove:
+
+```bash
+conda env remove -p "$ENV"
 ```
 
 ## 👥 Contributors
